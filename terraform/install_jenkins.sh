@@ -1,31 +1,40 @@
-
-
 #!/bin/bash
-sudo yum -y update
+sudo apt-get update -y
 
-echo "Install Java JDK 8"
-yum remove -y java
-yum install -y java-1.8.0-openjdk
+echo "***********************Install Java JDK*************************"
+# Install java
+if ! java -version 2>&1 >/dev/null | grep "java version\|openjdk version" ; then
+  sudo apt install default-jdk -y
+fi
 
-echo "Install Maven"
-yum install -y maven 
+echo "************************Install Maven***************************"
+sudo apt install -y maven
 
-echo "Install git"
-yum install -y git
+echo "***************************Install git*************************"
+sudo apt install -y git
 
-echo "Install Docker engine"
-yum update -y
-yum install docker -y
-#sudo usermod -a -G docker jenkins
-#sudo service docker start
-sudo chkconfig docker on
+echo "**********************Install Docker engine**********************"
+sudo apt-get update -y
+sudo apt install docker.io -y
 
-echo "Install Jenkins"
-wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo
-rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
-yum install -y jenkins
-sudo usermod -a -G docker jenkins
-sudo chkconfig jenkins on
+
+echo "************************Install Jenkins***********************"
+# Install Jenkins
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+
+sudo sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > \
+    /etc/apt/sources.list.d/jenkins.list'
+
+sudo apt-get update -y
+
+sudo apt-get install jenkins -y
+
+echo "****************************Add users to Docker group************************"
+
+sudo usermod -aG docker $USER  # add current user to docker group
+sudo usermod -aG docker jenkins  # add Jenkins user to docker group
+
+
+echo "****************************Start services*************************"
 sudo service docker start
 sudo service jenkins start
-
